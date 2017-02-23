@@ -10,8 +10,12 @@ parser.add_argument("-res_pos",default="1",help="Postive instance for resolution
 parser.add_argument("-embedding",default="/Users/yqy/work/data/word2vec/embedding.ontonotes",help="embedding dir")
 parser.add_argument("-embedding_dimention",default=100,type=int,help="embedding dimention")
 parser.add_argument("-test_data",default="None",help="Test data for DeepLearning")
+
+
 parser.add_argument("-echos",default=10,type=int,help="Echo Times")
 parser.add_argument("-lr",default=0.01,type=float,help="Learning Rate")
+
+
 args = parser.parse_args()
 
 '''

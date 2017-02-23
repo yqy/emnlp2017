@@ -231,11 +231,10 @@ if args.type == "nn_train":
     
             anaphorics = []
             ana_zps = []
-            for (zp_sentence_index,zp_index,antecedents,is_azp) in azps:
-                if is_azp:
-                    for (candi_sentence_index,begin_word_index,end_word_index) in antecedents:
-                        anaphorics.append((zp_sentence_index,zp_index,candi_sentence_index,begin_word_index,end_word_index))
-                        ana_zps.append((zp_sentence_index,zp_index))
+            for (zp_sentence_index,zp_index,antecedents,coref_id) in azps:
+                for (candi_sentence_index,begin_word_index,end_word_index,coref_id) in antecedents:
+                    anaphorics.append((zp_sentence_index,zp_index,candi_sentence_index,begin_word_index,end_word_index))
+                    ana_zps.append((zp_sentence_index,zp_index))
     
             for (sentence_index,zp_index) in zps:
     

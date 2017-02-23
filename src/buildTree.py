@@ -20,6 +20,21 @@ def is_pro(leaf_nodes):
             return True
     return False
 
+def is_zero_tag(leaf_nodes):
+    if len(leaf_nodes) == 1:
+        if leaf_nodes[0].word.find("*") >= 0:
+            return True
+    return False
+
+def is_np(tag):
+    #np_list = ['NP-SBJ', 'NP', 'NP-PN-OBJ', 'NP-PN', 'NP-PN-SBJ', 'NP-OBJ', 'NP-TPC-1', 'NP-TPC', 'NP-PN-VOC', 'NP-VOC', 'NP-IO', 'NP-SBJ-1', 'NP-PN-TPC', 'NP-PRD', 'NP-TMP', 'NP-PN-PRD', 'NP-PN-SBJ-1', 'NP-APP', 'NP-TPC-2', 'NP-PN-SBJ-3', 'NP-PN-IO', 'NP-PN-LOC', 'NP-SBJ-2', 'NP-PN-OBJ-1', 'NP-LGS', 'NP-MNR', 'NP-SBJ-3', 'NP-OBJ-PN', 'NP-SBJ-4', 'NP-PN-SBJ-2', 'NP-TPC-3', 'NP-HLN', 'NP-PN-APP', 'NP-SBJ-PN', 'NP-DIR', 'NP-LOC', 'NP-ADV', 'NP-WH-SBJ']
+    np_list = ['NP-PN-LOC', 'NP-PN-IO', 'NP-TPC-1', 'NP-PN-TPC', 'NP-PRD', 'NP-SBJ-1', 'NP-PN-VOC', 'NP-VOC', 'NP-IO', 'NP-TPC', 'NP-PN-OBJ', 'NP-OBJ', 'NP-PN', 'NP-PN-SBJ', 'NP', 'NP-SBJ']
+
+    if tag in np_list:
+        return True
+    else:
+        return False
+
 
 def get_info_from_file_system(file_name,parser_in,parser_out,MAX=2):
 
@@ -95,12 +110,16 @@ def get_info_from_file_system(file_name,parser_in,parser_out,MAX=2):
             nodes_info[sentence_num] = (nl,wl)
 
             for node in nl:
-                if (node.tag.find("NP") >= 0) and (node.tag.find("DNP") < 0):
-                    if (node.tag.find("NP") >= 0) and (node.tag.find("DNP") < 0):
+                #if (node.tag.find("NP") >= 0) and (node.tag.find("DNP") < 0):
+                #    if (node.tag.find("NP") >= 0) and (node.tag.find("DNP") < 0):
+                if (is_np(node.tag)) and (node.tag.find("DNP") < 0):
+                    if (node.parent.tag.startswith("NP") >= 0) and (node.parent.tag.find("DNP") < 0):
                         if not (node == node.parent.child[0]):
                             continue
                     leaf_nodes = node.get_leaf()
                     if is_pro(leaf_nodes):
+                        continue
+                    if is_zero_tag(leaf_nodes):
                         continue
 
                     candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index))
@@ -127,6 +146,7 @@ def get_info_from_file_system(file_name,parser_in,parser_out,MAX=2):
                     res_info = None
                     last_index = 0
                     antecedents = []
+                    coref_id = inline.strip().split(" ")[1]
                 else:
                     match = pattern_zp.match(inline)
                     if match:
@@ -140,10 +160,8 @@ def get_info_from_file_system(file_name,parser_in,parser_out,MAX=2):
                         ##################################
 
                         if word == "*pro*":
-                            is_azp = False
                             if not first:
-                                is_azp = True
-                                azps.append((sentence_index,begin_word_index,antecedents,is_azp))
+                                azps.append((sentence_index,begin_word_index,antecedents,coref_id))
 
                         '''
                         if word == "*pro*" and (not first):
@@ -161,12 +179,11 @@ def get_info_from_file_system(file_name,parser_in,parser_out,MAX=2):
                             first = False
                             res_info = inline
                             last_index = sentence_index
-                            antecedents.append((sentence_index,begin_word_index,end_word_index))
+                            antecedents.append((sentence_index,begin_word_index,end_word_index,coref_id))
         
         if not inline:
             break
     return zps,azps,candi,nodes_info
-
 
 def get_info_from_file(file_name,MAX=2):
 
@@ -233,15 +250,20 @@ def get_info_from_file(file_name,MAX=2):
             nodes_info[sentence_num] = (nl,wl)
 
             for node in nl:
-                if node.tag.find("NP") >= 0:
-                    if node.parent.tag.find("NP") >= 0:
+                #if node.tag.find("NP") >= 0:
+                #if node.tag.startswith("NP"):
+                if is_np(node.tag):
+                    #if node.parent.tag.find("NP") >= 0:
+                    if node.parent.tag.startswith("NP"):
                         if not (node == node.parent.child[0]):
                             continue
                     leaf_nodes = node.get_leaf()
                     if is_pro(leaf_nodes):
                         continue
+                    if is_zero_tag(leaf_nodes):
+                        continue
 
-                    candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index))
+                    candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index,node))
                     total += 1
             for node in wl:
                 if node.word == "*pro*":
@@ -265,6 +287,7 @@ def get_info_from_file(file_name,MAX=2):
                     res_info = None
                     last_index = 0
                     antecedents = []
+                    coref_id = inline.strip().split(" ")[1]
                 else:
                     match = pattern_zp.match(inline)
                     if match:
@@ -281,7 +304,7 @@ def get_info_from_file(file_name,MAX=2):
                             is_azp = False
                             if not first:
                                 is_azp = True
-                                azps.append((sentence_index,begin_word_index,antecedents,is_azp))
+                                azps.append((sentence_index,begin_word_index,antecedents,coref_id))
 
                         '''
                         if word == "*pro*" and (not first):
@@ -299,7 +322,7 @@ def get_info_from_file(file_name,MAX=2):
                             first = False
                             res_info = inline
                             last_index = sentence_index
-                            antecedents.append((sentence_index,begin_word_index,end_word_index))
+                            antecedents.append((sentence_index,begin_word_index,end_word_index,coref_id))
         
         if not inline:
             break
@@ -307,15 +330,47 @@ def get_info_from_file(file_name,MAX=2):
 def main():
     path = sys.argv[1]
     paths = get_dir.get_all_file(path,[])
+    candi_num = 0
+    all_num = 0
+    hit = 0
+    all_tag = {}
+
+    #### change azps and antecedents , add coref_id to the end of list
+    #### change candi[ci], add node info
+
     for p in paths:
         if p.strip().endswith("DS_Store"):continue
         file_name = p.strip()
         if file_name.endswith("onf"):
-            print >> sys.stderr, "Read File : %s"%file_name
-            zps,candi,nodes_info = get_info_from_file(file_name,2)
-            for (sentence_index,begin_word_index,antecedents,is_azp) in zps:
-                if is_azp:
-                    nl,wl = nodes_info[sentence_index]
-                    print wl[begin_word_index].word
+            #print >> sys.stderr, "Read File : %s"%file_name
+            zps,azps,candi,nodes_info = get_info_from_file(file_name,2)
+            all_ante = set()
+            anaphorics = [] 
+            ana_zps = [] 
+            for (zp_sentence_index,zp_index,antecedents,coref_id_zp) in azps:
+                for (candi_sentence_index,begin_word_index,end_word_index,coref_id_candi) in antecedents:
+                    anaphorics.append((zp_sentence_index,zp_index,candi_sentence_index,begin_word_index,end_word_index,coref_id))
+                    ana_zps.append((zp_sentence_index,zp_index,coref_id))
+                    all_ante.add((candi_sentence_index,begin_word_index,end_word_index))
+                    nl,wl = nodes_info[candi_sentence_index]
+            all_num += len(all_ante)
+    
+            #for (sentence_index,zp_index) in zps:
+            #    if (sentence_index,zp_index) in ana_zps:
+            #        nl,wl = nodes_info[sentence_index]
+            #        print wl[zp_index].word
+            for ci in candi:
+                candi_num += len(candi[ci])
+                for (candi_begin,candi_end,node) in candi[ci]:
+                    if (ci,candi_begin,candi_end) in all_ante:
+                        hit += 1
+                        all_tag.setdefault(node.tag,0)
+                        all_tag[node.tag] += 1
+
+    print candi_num
+    print hit,all_num
+    #print sorted(all_tag,key = lambda a:all_tag[a], reverse=False)
+
 if __name__ == "__main__":
     main()
+
