@@ -263,7 +263,8 @@ def get_info_from_file(file_name,MAX=2):
                     if is_zero_tag(leaf_nodes):
                         continue
 
-                    candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index,node))
+                    #candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index,node))
+                    candi[sentence_num].append((leaf_nodes[0].index,leaf_nodes[-1].index))
                     total += 1
             for node in wl:
                 if node.word == "*pro*":
