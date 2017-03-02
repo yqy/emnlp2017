@@ -31,7 +31,9 @@ Created by qyyin 2016.11.10
 GPU = True
 if GPU:
     print >> sys.stderr,"Trying to run under a GPU. If this is not desired,then modify NetWork.py\n to set the GPU flag to False."
-    try: theano.config.device = 'gpu'
+    try:
+        theano.config.device = 'gpu'
+        print >> sys.stderr,"Use gpu"
     except: pass # it's already set 
     theano.config.floatX = 'float32'
 else:
