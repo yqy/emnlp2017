@@ -14,6 +14,8 @@ parser.add_argument("-test_data",default="None",help="Test data for DeepLearning
 
 parser.add_argument("-echos",default=10,type=int,help="Echo Times")
 parser.add_argument("-lr",default=0.03,type=float,help="Learning Rate")
+parser.add_argument("-batch",default=15,type=int,help="batch size")
+
 
 
 args = parser.parse_args()
