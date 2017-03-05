@@ -399,7 +399,7 @@ if args.type == "nn_single":
                 predict_str_log = None
                 for i in range(len(zp_candi_list)): 
                     zp,candidate = zp_candi_list[i]
-                    nn_predict = outputs[i]
+                    nn_predict = outputs[i][0]
                     res_result = res_list[i]
                 
                     candi_sentence_index,candi_begin,candi_end = candidate
@@ -418,9 +418,9 @@ if args.type == "nn_single":
                 predict_result.append((sentence_index,zp_index,predict_candi_sentence_index,predict_candi_begin,predict_candi_end))
                 print >> sys.stderr, "Results:"
                 print >> sys.stderr, "Predict -- %s"%predict_str_log
-                print >> sys.stderr, "Done ZP #%d/%d"%(numOfZP,len(test_instances))
+                print >> sys.stderr, "Done ZP #%d/%d"%(numOfZP,len(test_instances_batch))
 
-        print >> sys.stderr, "Test Hits:",hits,"/",len(test_instances)
+        print >> sys.stderr, "Test Hits:",hits,"/",len(test_instances_batch)
 
         '''
         ### see how many hits in DEV ###
@@ -435,7 +435,7 @@ if args.type == "nn_single":
 
 
         print "Echo",echo 
-        print "Test Hits:",hits,"/",len(test_instances)
+        print "Test Hits:",hits,"/",len(test_instances_batch)
         get_prf(anaphorics_result,predict_result)
 
 
