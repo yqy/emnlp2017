@@ -1,1 +1,6 @@
-python resolution.py -type nn_train -data /Users/yqy/data/test -embedding /Users/yqy/work/data/word2vec/embedding.ontonotes -test_data /Users/yqy/data/test > result
+#python resolution.py -type nn_train -echos 20 -data /users1/qyyin/qyyin/ACL/data/train -embedding /users1/qyyin/cn/sogou.word2vec.100d.txt -test_data /users1/qyyin/qyyin/ACL/data/test > result
+#python resolution.py -type nn_train_feature -echos 20 -data /users1/qyyin/qyyin/ACL/data/train -embedding /users1/qyyin/cn/sogou.word2vec.100d.txt -test_data /users1/qyyin/qyyin/ACL/data/test > result
+#python resolution.py -type nn_train_feature -echos 20 -data /users1/qyyin/qyyin/ACL/data/train -embedding /users1/qyyin/cn/sogou.word2vec.100d.txt -test_data /users1/qyyin/qyyin/ACL/data/test -lr 0.003 > result
+#python resolution.py -type nn_train -echos 50 -data /users1/qyyin/qyyin/ACL/data/test -embedding /users1/qyyin/cn/yqy.skip -test_data /users1/qyyin/qyyin/ACL/data/test -lr 0.003 > result
+#python resolution.py -type nn_train -echos 20 -data /users1/qyyin/qyyin/ACL/data/train -embedding /users1/qyyin/cn/sogou.word2vec.100d.txt -test_data /users1/qyyin/qyyin/ACL/data/test -lr 0.003 > result
+python resolution.py -type nn_train -echos 20 -data /users1/qyyin/qyyin/ACL/data/train -embedding /users1/qyyin/cn/sogou.word2vec.50d.txt -test_data /users1/qyyin/qyyin/ACL/data/test -lr 0.003 -embedding_dimention 50 > result

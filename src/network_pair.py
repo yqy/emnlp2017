@@ -84,9 +84,11 @@ class NetWork():
 
         self.np_out = T.concatenate((self.np_nn_post_output,self.np_nn_pre_output),axis=1)
 
-        np_nn_f = LSTM(n_hidden*2,n_hidden*2,self.np_out)
+        #np_nn_f = LSTM(n_hidden*2,n_hidden*2,self.np_out)
+        np_nn_f = RNN(n_hidden*2,n_hidden*2,self.np_out)
         self.params += np_nn_f.params
-        np_nn_b = LSTM(n_hidden*2,n_hidden*2,self.np_out[::-1])
+        #np_nn_b = LSTM(n_hidden*2,n_hidden*2,self.np_out[::-1])
+        np_nn_b = RNN(n_hidden*2,n_hidden*2,self.np_out[::-1])
         self.params += np_nn_b.params
 
         self.bi_np_out = T.concatenate((np_nn_f.all_hidden,np_nn_b.all_hidden[::-1]),axis=1)
@@ -112,6 +114,7 @@ class NetWork():
 
         #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
         self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
+        #self.calcu_attention = tanh(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
 
         self.attention = softmax(T.transpose(self.calcu_attention,axes=(1,0)))[0]
         #self.attention = T.transpose(self.calcu_attention,axes=(1,0))[0]
@@ -143,6 +146,7 @@ class NetWork():
         
         updates = lasagne.updates.sgd(cost, self.params, lr)
         #updates = lasagne.updates.adadelta(cost, self.params)
+        #updates = lasagne.updates.adam(cost, self.params)
 
         
         self.train_step = theano.function(
