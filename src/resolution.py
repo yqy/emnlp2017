@@ -399,7 +399,7 @@ if args.type == "nn_single":
                 predict_str_log = None
                 for i in range(len(zp_candi_list)): 
                     zp,candidate = zp_candi_list[i]
-                    nn_predict = outputs[i]
+                    nn_predict = outputs[i][0]
                     res_result = res_list[i]
                 
                     candi_sentence_index,candi_begin,candi_end = candidate
