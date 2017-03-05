@@ -605,12 +605,10 @@ class RNN():
         else:
             self.x = T.matrix("x")
 
-        self.y = T.ivector("y")
+        w_in,b_in = init_weight(n_in,n_hidden,pre="rnn_x") 
+        self.params += [w_in]
 
-        w_in,b_in = init_weight(n_in,n_hidden) 
-        self.params += [w_in,b_in]
-
-        w_h,b_h = init_weight(n_hidden,n_hidden)
+        w_h,b_h = init_weight(n_hidden,n_hidden,pre="rnn_h")
         self.params += [w_h,b_h]     
 
         h_t_0 = theano.shared(np.zeros(n_hidden, dtype=theano.config.floatX))
