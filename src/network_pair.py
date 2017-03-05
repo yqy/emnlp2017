@@ -122,6 +122,12 @@ class NetWork():
         self.out = self.attention
 
         self.get_out = theano.function(inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc],outputs=[self.out],on_unused_input='warn')
+
+        self.get_max = theano.function(
+            inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc,t],
+            outputs=[max_attention],
+            on_unused_input='warn')
+
         
         l1_norm_squared = sum([(w**2).sum() for w in self.params])
         l2_norm_squared = sum([(abs(w)).sum() for w in self.params])
@@ -161,6 +167,7 @@ def main():
 
     #print r.get_np_out(np_x,npp_x,np_x,npp_x,mask,maskk,mask,maskk)
     print r.get_out(zp_x,zp_x,np_x,npp_x,np_x,npp_x,mask,maskk,mask,maskk)
+    print r.get_max(zp_x,zp_x,np_x,npp_x,np_x,npp_x,mask,maskk,mask,maskk,t)
     print "Train"
     print r.train_step(zp_x,zp_x,np_x,npp_x,np_x,npp_x,mask,maskk,mask,maskk,t,5)
     print r.train_step(zp_x,zp_x,np_x,npp_x,np_x,npp_x,mask,maskk,mask,maskk,t,5)

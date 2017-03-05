@@ -99,6 +99,14 @@ def find_max(l):
             return_index = i
     return return_index
 
+def get_dijian(n):
+    norm = 0.5
+    p_list = [0.7,0.7,0.8,1.0]
+    if n <= 4:
+        return numpy.array(p_list[-n:])
+    else:
+        return numpy.array([0.5]*(n-4)+p_list)
+
 if args.type == "nn_train":
 
     if os.path.isfile("./model/save_data"):
@@ -156,7 +164,10 @@ if args.type == "nn_train":
         random.shuffle(training_instances)
 
         for zp_x_pre,zp_x_post,np_x_pre_list,np_x_prec_list,np_x_post_list,np_x_postc_list,mask_pre,mask_prec,mask_post,mask_postc,res_list in training_instances:
+            #np_num = len(res_list)
+            #dijian = get_dijian(np_num)
             cost += LSTM.train_step(zp_x_pre,zp_x_post,np_x_pre_list,np_x_prec_list,np_x_post_list,np_x_postc_list,mask_pre,mask_prec,mask_post,mask_postc,res_list,args.lr)[0]
+            #cost += LSTM.train_step(zp_x_pre,zp_x_post,np_x_pre_list,np_x_prec_list,np_x_post_list,np_x_postc_list,mask_pre,mask_prec,mask_post,mask_postc,res_list,dijian,args.lr)[0]
 
         end_time = timeit.default_timer()
         print >> sys.stderr,"Cost",cost
