@@ -54,6 +54,27 @@ class Word2Vec:
             return array([0.0]*self.dimention)
         return result/len(wl)
 
+
+class Word2VecIndex:
+    word_dict = {}
+    def __init__(self,w2v_dir="../data/word2vec",dimention=100):
+        self.dimention = dimention
+        f = open(w2v_dir)
+        line = f.readline()
+        index = 1
+        while True:
+            line = f.readline()
+            if not line:break
+            line = line.strip().split(" ")
+            word = line[0]
+            self.word_dict[word] = index
+            index += 1
+    def get_index_by_word(self,word):
+        if word in self.word_dict:
+            return self.word_dict[word]
+        else:
+            return -1
+
 def main():
     w2v = Word2Vec("../data/word2vec")
     print "go"

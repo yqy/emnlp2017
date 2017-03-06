@@ -345,13 +345,21 @@ def main():
         if file_name.endswith("onf"):
             #print >> sys.stderr, "Read File : %s"%file_name
             zps,azps,candi,nodes_info = get_info_from_file(file_name,2)
+            for k in nodes_info:
+                nl,wl = nodes_info[k]
+                out = []
+                for n in nl:
+                    if n.word.find("*") < 0:
+                        out.append(n.word)
+                print (" ".join(out)).strip()
+                
             all_ante = set()
             anaphorics = [] 
             ana_zps = [] 
             for (zp_sentence_index,zp_index,antecedents,coref_id_zp) in azps:
                 for (candi_sentence_index,begin_word_index,end_word_index,coref_id_candi) in antecedents:
-                    anaphorics.append((zp_sentence_index,zp_index,candi_sentence_index,begin_word_index,end_word_index,coref_id))
-                    ana_zps.append((zp_sentence_index,zp_index,coref_id))
+                    anaphorics.append((zp_sentence_index,zp_index,candi_sentence_index,begin_word_index,end_word_index,coref_id_candi))
+                    ana_zps.append((zp_sentence_index,zp_index,coref_id_candi))
                     all_ante.add((candi_sentence_index,begin_word_index,end_word_index))
                     nl,wl = nodes_info[candi_sentence_index]
             all_num += len(all_ante)
@@ -360,16 +368,16 @@ def main():
             #    if (sentence_index,zp_index) in ana_zps:
             #        nl,wl = nodes_info[sentence_index]
             #        print wl[zp_index].word
-            for ci in candi:
-                candi_num += len(candi[ci])
-                for (candi_begin,candi_end,node) in candi[ci]:
-                    if (ci,candi_begin,candi_end) in all_ante:
-                        hit += 1
-                        all_tag.setdefault(node.tag,0)
-                        all_tag[node.tag] += 1
+            #for ci in candi:
+            #    candi_num += len(candi[ci])
+            #    for (candi_begin,candi_end,node) in candi[ci]:
+            #        if (ci,candi_begin,candi_end) in all_ante:
+            #            hit += 1
+            #            all_tag.setdefault(node.tag,0)
+            #            all_tag[node.tag] += 1
 
-    print candi_num
-    print hit,all_num
+    #print candi_num
+    #print hit,all_num
     #print sorted(all_tag,key = lambda a:all_tag[a], reverse=False)
 
 if __name__ == "__main__":

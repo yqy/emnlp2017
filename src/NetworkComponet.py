@@ -12,6 +12,7 @@ from theano.tensor import shared_randomstreams
 from theano.tensor.signal import downsample
 
 from theano.compile.nanguardmode import NanGuardMode
+from conf import *
 
 
 import lasagne
@@ -623,3 +624,28 @@ class RNN():
     def recurrent_fn(self,x,h_t_1,w_in,w_h,b):
         h_t = sigmoid(T.dot(h_t_1, w_h) + T.dot(x, w_in) + b)
         return h_t
+
+def init_weight_file(fn,dimention=100,pre="embedding"):
+    f = open(fn)
+    numnum = 1 
+    oo = []
+    oo.append([0.0]*dimention)
+    while True:
+        line = f.readline()
+        if not line:break
+        line = line.strip().split(" ")[1:]
+        numnum += 1
+        if numnum%100000 == 0:print >> sys.stderr,numnum
+        out = [float(t.strip()) for t in line]
+        if not len(out) == dimention:continue
+        oo.append(out)
+    #print oo
+    W_values = np.asarray(oo,dtype = theano.config.floatX)
+    #print oo
+    #W_values = np.array(oo)
+    #print W_values.shape
+    w = theano.shared(
+        value=W_values,
+        name='%sw'%pre, borrow=True
+    )   
+    return w
