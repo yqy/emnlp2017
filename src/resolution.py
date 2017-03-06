@@ -327,7 +327,8 @@ if args.type == "nn_single":
         LSTM = cPickle.load(read_f)
         print >> sys.stderr,"Read model from ./model/lstm_init_model"
     else: 
-        LSTM = network.NetWork(100,args.embedding_dimention,61)
+        #LSTM = network.NetWork(100,args.embedding_dimention,61)
+        LSTM = network.NetWork(128,args.embedding_dimention,61)
         print >> sys.stderr,"save model ..."
         save_f = file('./model/lstm_init_model', 'wb') 
         cPickle.dump(LSTM, save_f, protocol=cPickle.HIGHEST_PROTOCOL)
@@ -399,7 +400,7 @@ if args.type == "nn_single":
                 predict_str_log = None
                 for i in range(len(zp_candi_list)): 
                     zp,candidate = zp_candi_list[i]
-                    nn_predict = outputs[i][0]
+                    nn_predict = outputs[i][1]
                     res_result = res_list[i]
                 
                     candi_sentence_index,candi_begin,candi_end = candidate
