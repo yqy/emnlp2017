@@ -58,7 +58,10 @@ def main():
         training_instances.append( ([get_index(word_dict,line[0]),get_index(word_dict,line[1]), get_index(word_dict,line[3]), get_index(word_dict,line[4])],y,y1,y2,y3) )
 
     print >> sys.stderr, "Generate totally",len(training_instances),"instances"
-    for k in sorted(word_type_calculate.keys(),lambda a:word_type_calculate[a], reverse = True):
+    end_time = timeit.default_timer()
+    print >> sys.stderr,"Totally", end_time - start_time, "seconds!"
+    
+    for k in sorted(word_type_calculate.keys(),key=lambda a:word_type_calculate[a], reverse = True):
         print >> sys.stderr, k, word_type_calculate[k]
 
     training_instances_batch = []
@@ -76,9 +79,11 @@ def main():
             y3l.append(y3)
         training_instances_batch.append((numpy.array(xl,dtype=numpy.int32),numpy.array(yl,dtype=numpy.int32),numpy.array(y1l,dtype=numpy.int32),numpy.array(y2l,dtype=numpy.int32),numpy.array(y3l,dtype=numpy.int32)) ) 
 
+    print >> sys.stderr, "Building neural network"
     net = neural.Net(args.embedding_dimention,100,len(word_dict),args.batch_size)    
     random.shuffle(training_instances_batch)
 
+    print >> sys.stderr, "Begin Train!"
     loss = 999999999999
     for i in range(args.echos):
         this_loss = 0.0
