@@ -8,6 +8,11 @@ import neural
 from conf import *
 import wordAttr
 
+def get_index(d,w):
+    if w in d:
+        return d[w]
+    else:
+        return 0
 
 def main():
 
@@ -19,7 +24,9 @@ def main():
     word_dict = {}
     word_file = open(args.embedding_file)
     line = word_file.readline()
-    index = 0 
+    # word_dict[UNK] = 0
+    # embedding 第0维: UNK
+    index = 1 
     while True:
         line = word_file.readline()
         if not line:break
@@ -31,6 +38,7 @@ def main():
     ## generate training data ##
     training_instances = []
     f = open(args.data)
+    word_type_calculate = {}
     while True:
         line = f.readline()
         if not line:break
@@ -41,10 +49,17 @@ def main():
         if not center_word in word_dict:
             continue
         y1,y2,y3 = WA.get_att(center_word)
+        word_type_calculate.setdefault((y1,y2,y3),0)
+        word_type_calculate[(y1,y2,y3)] += 1
+
         y = word_dict[center_word]
-        if (line[0] in word_dict) and (line[1] in word_dict) and (line[3] in word_dict) and (line[4] in word_dict):
-            training_instances.append( ([word_dict[line[0]],word_dict[line[1]],word_dict[line[3]],word_dict[line[4]]],y,y1,y2,y3) )
+        #if (line[0] in word_dict) and (line[1] in word_dict) and (line[3] in word_dict) and (line[4] in word_dict):
+            #training_instances.append( ([word_dict[line[0]],word_dict[line[1]],word_dict[line[3]],word_dict[line[4]]],y,y1,y2,y3) )
+        training_instances.append( ([get_index(word_dict,line[0]),get_index(word_dict,line[1]), get_index(word_dict,line[3]), get_index(word_dict,line[4])],y,y1,y2,y3) )
+
     print >> sys.stderr, "Generate totally",len(training_instances),"instances"
+    for k in sorted(word_type_calculate.keys(),lambda a:word_type_calculate[a], reverse = True):
+        print >> sys.stderr, k, word_type_calculate[k]
 
     training_instances_batch = []
     for i in range(len(training_instances)/args.batch_size):
