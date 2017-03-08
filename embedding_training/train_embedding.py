@@ -35,6 +35,8 @@ def main():
         line = f.readline()
         if not line:break
         line = line.strip().split(" ")
+        if not len(line) == 5:
+            continue
         center_word = line[2]
         if not center_word in word_dict:
             continue
@@ -63,7 +65,7 @@ def main():
     random.shuffle(training_instances_batch)
 
     loss = 999999999999
-    for i in range(10):
+    for i in range(args.echos):
         this_loss = 0.0
         for x,y,y1,y2,y3 in training_instances_batch:
             this_loss += net.train_step(x,y,y1,y2,y3,args.lr)[0]
