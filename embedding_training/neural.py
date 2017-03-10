@@ -7,9 +7,9 @@ class Net():
 
         self.params = []
         # generate embedding in random
-        self.w_embedding,b_zp = init_weight(voc_size,embedding_dimention)
+        #self.w_embedding,b_zp = init_weight(voc_size,embedding_dimention)
         # generate embedding by file
-        #self.w_embedding = init_weight_file(args.embedding_file,args.embedding_dimention)
+        self.w_embedding = init_weight_file(args.embedding_file,embedding_dimention)
         
         self.x = T.imatrix("X")
         self.w_embedding_sub = self.w_embedding[self.x.flatten()]
@@ -17,13 +17,16 @@ class Net():
         self.inpt = self.w_embedding_sub
         self.inpt = self.inpt.reshape((batch_size,window_size*embedding_dimention))
         
-        linearLayer = Layer(window_size * embedding_dimention,hidden_layer_dimention,self.inpt,linear)
+        #linearLayer = Layer(window_size * embedding_dimention,hidden_layer_dimention,self.inpt,linear)
+        linearLayer = Layer(window_size * embedding_dimention,hidden_layer_dimention,self.inpt,tanh)
         self.params += linearLayer.params
 
-        vocOutputLayer = Layer(hidden_layer_dimention,voc_size,linearLayer.output,linear)
+        #vocOutputLayer = Layer(hidden_layer_dimention,voc_size,linearLayer.output,linear)
+        vocOutputLayer = Layer(hidden_layer_dimention,voc_size,linearLayer.output,tanh)
         self.params += vocOutputLayer.params
 
-        coreOutputLayer = Layer(hidden_layer_dimention,10,linearLayer.output,linear)
+        #coreOutputLayer = Layer(hidden_layer_dimention,10,linearLayer.output,linear)
+        coreOutputLayer = Layer(hidden_layer_dimention,10,linearLayer.output,tanh)
         self.params += coreOutputLayer.params
 
         vocResult = softmax(vocOutputLayer.output)
@@ -36,7 +39,8 @@ class Net():
         l2_norm_squared = sum([(abs(w)).sum() for w in self.params])
 
         #lmbda_l1 = 0.0 
-        lmbda_l2 = 0.001 
+        #lmbda_l2 = 0.0001 
+        lmbda_l2 = 0.0
 
         y1 = T.ivector('y1')
         y2 = T.ivector('y2')
@@ -44,7 +48,7 @@ class Net():
         y = T.ivector('voc')
 
         ###y对应着 第一种分类 y=[0,2,1] 表示 batch=3的情况下，每个case的分类分别为0 2 1
-        cost = T.mean(-(T.log(vocResult)[T.arange(y.shape[0]), y])) +\
+        cost = 0.5*T.mean(-(T.log(vocResult)[T.arange(y.shape[0]), y])) +\
             T.mean(-(T.log(coreResult)[T.arange(y1.shape[0]), y1])) +\
             T.mean(-(T.log(coreResult)[T.arange(y2.shape[0]), y2])) +\
             T.mean(-(T.log(coreResult)[T.arange(y3.shape[0]), y3])) +\
