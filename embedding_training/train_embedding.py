@@ -134,6 +134,11 @@ def main():
                 fw.write(str(list(em)))
                 fw.write("\n")
             fw.close()
+
+            save_f = file('./model/neural_model'+str(i), 'wb')
+            cPickle.dump(net, save_f, protocol=cPickle.HIGHEST_PROTOCOL)
+            save_f.close()
+
         end_time = timeit.default_timer()
         print >> sys.stderr,"One Epoch for: ", end_time - start_time, "seconds!"
         print >> sys.stderr,"Loss:",this_loss
