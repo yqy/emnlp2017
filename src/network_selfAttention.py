@@ -163,7 +163,7 @@ class NetWork():
         self.params += [w_attention_zp,b_attention]
 
         w_attention_np,b_u = init_weight(n_hidden*2,1,pre="attention_np",ones=False) 
-        self.params += [w_attention_np]
+        #self.params += [w_attention_np]
 
         w_attention_np_rnn,b_u = init_weight(n_hidden*4,1,pre="attention_np_rnn",ones=False) 
         self.params += [w_attention_np_rnn]
@@ -174,7 +174,8 @@ class NetWork():
 
         #self.calcu_attention_dropout = tanh(T.dot(np_out_dropout,w_attention_np_rnn) + T.dot(zp_out_dropout,w_attention_zp) + T.dot(np_dropout,w_attention_np) + b_attention)
 
-        self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
+        #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
+        self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + b_attention)
 
         self.attention = softmax(T.transpose(self.calcu_attention,axes=(1,0)))[0]
         #self.attention_dropout = softmax(T.transpose(self.calcu_attention_dropout,axes=(1,0)))[0]
