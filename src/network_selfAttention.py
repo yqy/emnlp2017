@@ -79,10 +79,11 @@ class NetWork():
         A_pre = softmax(T.dot(Ws2_pre,T.dot(Ws1_pre,T.transpose(H_pre))))
 
         P_pre = T.dot(A_pre,T.transpose(A_pre))-danwei
-        norm_pre, _ = theano.scan(lambda i, tmp: T.dot(P_pre[i], P_pre[i]) + tmp,
-                  sequences = T.arange(P_pre.shape[0]),
-                  outputs_info = np.asarray(0., dtype=theano.config.floatX))  
-        f_norm_pre = T.sum(norm_pre[-1])
+        #norm_pre, _ = theano.scan(lambda i, tmp: T.dot(P_pre[i], P_pre[i]) + tmp,
+        #          sequences = T.arange(P_pre.shape[0]),
+        #          outputs_info = np.asarray(0., dtype=theano.config.floatX))  
+        #f_norm_pre = T.sum(norm_pre[-1])
+        f_norm_pre = (P_pre**2).sum()
         zp_out_pre = T.mean(T.dot(A_pre,H_pre),axis=0) 
 
         Ws1_post,heihei = init_weight(n_hidden,n_hidden,pre="Ws1_post_zp",ones=False)
@@ -91,10 +92,12 @@ class NetWork():
         A_post = softmax(T.dot(Ws2_post,T.dot(Ws1_post,T.transpose(H_post))))
 
         P_post = T.dot(A_post,T.transpose(A_post))-danwei
-        norm_post, _ = theano.scan(lambda i, tmp: T.dot(P_post[i], P_post[i]) + tmp,
-                  sequences = T.arange(P_post.shape[0]),
-                  outputs_info = np.asarray(0., dtype=theano.config.floatX))  
-        f_norm_post = T.sum(norm_post[-1])
+        #norm_post, _ = theano.scan(lambda i, tmp: T.dot(P_post[i], P_post[i]) + tmp,
+        #          sequences = T.arange(P_post.shape[0]),
+        #          outputs_info = np.asarray(0., dtype=theano.config.floatX))  
+        #f_norm_post = T.sum(norm_post[-1])
+        f_norm_post = (P_post**2).sum()
+
         zp_out_post = T.mean(T.dot(A_post,H_post),axis=0) 
         
         f_norm = f_norm_pre + f_norm_post
