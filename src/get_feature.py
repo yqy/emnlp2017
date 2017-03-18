@@ -155,6 +155,7 @@ def get_azp_feature_zp(zp_node,wl,trans):
                 if wlf.tag.find("NP") >= 0:
                     ifl.append("PlisNP:1")
             if wrf:
+                print "get",c.tag,c.parent.tag
                 if wrf.tag.find("VP") >= 0:
                     ifl.append("PrisVP:1")
             if wlf:
@@ -974,6 +975,467 @@ def get_template(zp,candidate,wl_zp,wl_candi,HcPz,PcPz,HcP):
     ifl.append("Head_c+Punc:%s"%hcp)
 
     return ifl
+
+def get_common_node(node1,node2):
+
+    if not node1:
+        return None
+    if not node2:
+        return None
+
+    this_parent = node1.parent
+    parent_list = []
+    while this_parent:
+        parent_list.append(this_parent)
+        this_parent = this_parent.parent
+
+    this_parent = node2.parent
+    while this_parent:
+        if this_parent in parent_list:
+            return this_parent
+        this_parent = this_parent.parent
+
+    return None
+def get_ancestor_by_node(node,common_ancestor):
+    child_list = common_ancestor.child[:]
+    child_list.append(common_ancestor)
+
+    this_parent = node.parent
+    while this_parent:
+        if this_parent in child_list:
+            return this_parent
+        this_parent = this_parent.parent
+    return None
+
+def build_zero_one(index,num):
+    ## 做num个0 0 0向量，其中index那维置为一
+    tmp_ones = [0]*num
+    tmp_ones[index] = 1
+    return tmp_ones
+    
+
+def get_res_feature_NN_new(zp,candidate,wl_zp,nl,wl_candi):
+
+    ifl = []
+
+    (zp_sentence_index,zp_index) = zp
+    (candi_sentence_index,candi_index_begin,candi_index_end) = candidate
+
+    zp_node = wl_zp[zp_index]
+
+    w_l_index = zp_index - 1
+    w_r_index = zp_index + 1
+    w_l_node = None
+    if w_l_index >= 0:
+        w_l_node = wl_zp[w_l_index]
+    w_r_node = None
+    if w_r_index < len(wl_zp):
+        w_r_node = wl_zp[w_r_index]
+
+    if w_l_node and w_r_node:
+        print zp_sentence_index+1,zp_index,w_l_node.word,w_r_node.word
+    common_ancestor = get_common_node(w_l_node,w_r_node)
+
+    w_l_punc = 0
+    w_l_comma = 0
+
+    comma = [",","，","、"]
+
+    if w_l_node:
+        if w_l_node.tag.startswith("PU"):
+            w_l_punc = 1
+            if w_l_node.word in comma:
+                w_l_comma = 1
+
+    tmp_ones = [0]*2
+    tmp_ones[w_l_punc] = 1 
+    ifl += tmp_ones
+    tmp_ones = [0]*2
+    tmp_ones[w_l_comma] = 1 
+    ifl += tmp_ones
+
+    p_l_node = None
+    p_r_node = None
+
+    c_VP = 0
+    VP_in_IP = 0
+    if common_ancestor:
+        p_l_node = get_ancestor_by_node(w_l_node,common_ancestor)
+        p_r_node = get_ancestor_by_node(w_r_node,common_ancestor)
+        #print common_ancestor.tag,p_l_node.tag,p_r_node.tag
+        if common_ancestor.tag.startswith("VP"):
+            c_VP = 1
+
+        this_parent = w_r_node.parent
+        while this_parent:
+            if this_parent is common_ancestor:
+                break
+            if this_parent.tag.startswith("VP"):
+                if this_parent.parent:
+                    if this_parent.parent.tag.startswith("IP"):
+                        VP_in_IP = 1
+                        break
+            this_parent = this_parent.parent
+
+    tmp_ones = [0]*2
+    tmp_ones[c_VP] = 1 
+    ifl += tmp_ones
+
+    tmp_ones = [0]*2
+    tmp_ones[VP_in_IP] = 1 
+    ifl += tmp_ones
+    
+    first_zp = 0 
+
+    zp_parent = zp_node.parent
+    ip_node = None
+    while zp_parent:
+        if zp_parent.tag.startswith("IP"):
+            ip_node = zp_parent
+            break
+        zp_parent = zp_parent.parent
+
+    if ip_node:
+        leafs = ip_node.get_leaf()
+        for n in leafs:
+            if n.word == "*pro*" and not zp_node == n:
+                first_zp = -1
+                break
+            if zp_node == n:
+                first_zp = -2
+                break
+    if first_zp == -1:
+        ## 有一个pro在zp前边
+        first_zp = 0
+    elif first_zp == -2:
+        ## 第一个
+        first_zp = 1
+
+    tmp_ones = [0]*2
+    tmp_ones[first_zp] = 1 
+    ifl += tmp_ones
+
+    sublessIP = True
+    if ip_node:
+        for n in ip_node.child:
+            if n.tag.find("SBJ") >= 0:
+                sublessIP = False
+                break
+    first_subless_zp = 0
+    if first_zp == 1 and sublessIP:
+        first_subless_zp = 1
+    tmp_ones = [0]*2
+    tmp_ones[first_subless_zp] = 1 
+    ifl += tmp_ones
+
+    wr_nt = 0
+    if w_r_node:
+        if w_r_node.tag.find("NT") >= 0:
+            wr_nt = 1
+
+    tmp_ones = [0]*2
+    tmp_ones[wr_nt] = 1 
+    ifl += tmp_ones
+
+    in_vp_or_np = 0
+    if w_r_node:
+        if w_r_node.tag.startswith("V"):
+            father = w_r_node.parent
+            while father:
+                if father.tag.find("VP") >= 0 or father.tag.find("NP") >= 0:
+                    in_vp_or_np = 1
+                    break
+                father = father.parent
+    tmp_ones = [0]*2
+    tmp_ones[in_vp_or_np] = 1 
+    ifl += tmp_ones
+
+    plNP = 0
+    if p_l_node:
+        if p_l_node.tag.find("NP") >= 0:
+            plNP = 1
+    tmp_ones = [0]*2
+    tmp_ones[plNP] = 1 
+    ifl += tmp_ones
+
+    prVP = 0
+    if p_r_node:
+        if p_r_node.tag.find("VP") >= 0:
+            prVP = 1
+    tmp_ones = [0]*2
+    tmp_ones[prVP] = 1 
+    ifl += tmp_ones
+
+    VP_node = None 
+    for i in range(zp_index,len(wl_zp)):
+        if wl_zp[i].tag.find("V") >= 0:
+            this_father = wl_zp[i].parent
+            while this_father:
+                if this_father.tag.find("VP") >= 0:
+                    VP_node = this_father
+                    break
+                this_father = this_father.parent
+            
+            if VP_node is not None:
+                break
+    vp_np_ancestor = 0
+    vp_vp_ancestor = 0
+    vp_cp_ancestor = 0
+    CP_node = None
+    if VP_node:
+        this_father = VP_node.parent
+        while this_father:
+            if this_father.tag.startswith("NP"):
+                vp_np_ancestor = 1
+            if this_father.tag.startswith("VP"):
+                vp_vp_ancestor = 1 
+            if this_father.tag.startswith("CP"):
+                vp_cp_ancestor = 1
+                if not CP_node:
+                    CP_node = this_father
+            this_father = this_father.parent
+    tmp_ones = [0]*2
+    tmp_ones[vp_np_ancestor] = 1 
+    ifl += tmp_ones
+
+    tmp_ones = [0]*2
+    tmp_ones[vp_vp_ancestor] = 1 
+    ifl += tmp_ones
+
+    tmp_ones = [0]*2
+    tmp_ones[vp_cp_ancestor] = 1 
+    ifl += tmp_ones
+
+    first_gap = 1
+    for i in range(zp_index):
+        if wl_zp[i].word == "*pro*":
+            first_gap = 0
+            break
+    tmp_ones = [0]*2
+    tmp_ones[first_gap] = 1 
+    ifl += tmp_ones
+    
+    tags = zp_node.parent.tag.split("-") 
+    z_gram_role = 0
+    z_Headline = 0
+    if len(tags) >= 2:
+        if tags[-1] == "SBJ":
+            z_gram_role = 1
+        if tags[-1] == "OBJ":
+            z_gram_role = 2
+        if tags[-1] == "HLN":
+            z_Headline = 1
+
+    tmp_ones = [0]*3
+    tmp_ones[z_gram_role] = 1
+    ifl += tmp_ones
+
+    tmp_ones = [0]*2
+    tmp_ones[z_Headline] = 1
+    ifl += tmp_ones
+
+    #从句:有CP ancestor S
+    #独立从句:有CP CP下有IP I
+    #主句:直接有根节点的IP  M
+    #其他:无CP，有非根节点的IP X
+    z_clause = 0
+    if vp_cp_ancestor == 1:
+        z_clause = 1
+        father = zp_node.parent
+        while father:
+            if father.tag.startswith("IP"):
+                z_clause = 2
+                break
+            if father == CP_node:
+                break
+            father = father.parent 
+    else:
+        z_clause = 3
+        father = zp_node.parent
+        while father:
+            if father.tag.startswith("IP"):
+                if father.parent: #非根节点
+                    z_clause = 4
+                    break
+            father = father.parent
+
+    tmp_ones = [0]*5
+    tmp_ones[z_clause] = 1
+    ifl += tmp_ones
+
+    candi_node = wl_candi[candi_index_begin] #拿第一个node取特征
+
+    candi_ancestor_NP = 0
+    candi_ancestor_VP = 0
+    candi_ancestor_CP = 0
+    candi_NP_in_IP = 0
+    candi_VP_in_IP = 0
+    first_ip = 1
+    candi_parent = candi_node.parent
+    CP_node = None
+    while candi_parent:
+        if candi_parent.tag.startswith("NP"):
+            candi_ancestor_NP = 1
+        if candi_parent.tag.startswith("VP"):
+            candi_ancestor_VP = 1
+        if candi_parent.tag.startswith("CP"):
+            candi_ancestor_CP = 1
+            if not CP_node:
+                CP_node = candi_parent
+        if candi_parent.tag.startswith("IP"):
+            if candi_ancestor_NP == 1 and first_ip == 1:
+                ## 既出现NP，又是第一个IP
+                candi_NP_in_IP = 1
+            if candi_ancestor_VP == 1 and first_ip == 1:
+                candi_VP_in_IP = 1
+            first_ip = 0
+
+        candi_parent = candi_parent.parent 
+
+    ifl += build_zero_one(candi_ancestor_NP,2)
+    ifl += build_zero_one(candi_ancestor_VP,2)
+    ifl += build_zero_one(candi_ancestor_CP,2)
+    ifl += build_zero_one(candi_NP_in_IP,2)
+    ifl += build_zero_one(candi_VP_in_IP,2)
+    
+    tags = candi_node.parent.tag.split("-") 
+    candi_gram_role = 0
+    candi_Headline = 0
+    if len(tags) >= 2:
+        if tags[-1] == "SBJ":
+            candi_gram_role = 1
+        if tags[-1] == "OBJ":
+            candi_gram_role = 2
+        if tags[-1] == "HLN":
+            candi_Headline = 1
+    ifl += build_zero_one(candi_gram_role,3)
+    ifl += build_zero_one(candi_Headline,2)
+
+    this_parent = candi_node.parent
+    adverb_NP = 0
+    temporal_NP = 0
+    name_entity = 0
+
+    while this_parent:
+        if this_parent.tag.startswith("NP"):
+            np_tag = this_parent.tag.split("-") 
+            if len(np_tag) >= 2:
+                if np_tag[-1] == "TMP":
+                    temporal_NP = 1
+                if np_tag[-1] == "ADV":
+                    adverb_NP = 1
+            break
+
+        this_parent = this_parent.parent
+    ifl += build_zero_one(temporal_NP,2)
+    ifl += build_zero_one(adverb_NP,2)
+
+    pronoun_NP = 0
+    if candi_index_begin == candi_index_end:
+        if candi_node.tag.startswith("PN"):
+            pronoun_NP = 1
+
+    ifl += build_zero_one(pronoun_NP,2)
+    
+    candi_head_verb = get_head_verb(candi_index_begin,wl_candi)
+    zp_head_verb = get_head_verb(zp_index,wl_zp)
+
+    verb_same = 0
+    if candi_head_verb and zp_head_verb:
+        if candi_head_verb.word == zp_head_verb.word:
+            verb_same = 1 
+    ifl += build_zero_one(verb_same,2)
+
+    sentence_dis = zp_sentence_index - candi_sentence_index
+
+    tmp_ones = [0]*3
+    tmp_ones[sentence_dis] = 1 
+    ifl += tmp_ones
+    
+    dist_seg = 10
+    if sentence_dis == 0:
+        if zp_index >= candi_index_end:
+            dist_seg = 0
+            for node in wl_zp[candi_index_end:zp_index]:
+                if node.tag == "PU":
+                    dist_seg += 1
+                    if dist_seg >= 9:
+                        break
+    ifl += build_zero_one(dist_seg,11)
+
+    closest_NP = 0
+    if sentence_dis == 0:
+        if candi_index_end <= zp_index:
+            closest_NP = 1
+        for i in range(candi_index_end+1,zp_index):
+            node = wl_zp[i]
+            while True:
+                if node.tag.startswith("NP"):
+                    closest_NP = 0
+                    break
+                node = node.parent
+                if not node:
+                    break
+            if closest_NP == 0:
+                break
+
+    tmp_ones = [0]*2
+    tmp_ones[closest_NP] = 1
+    ifl += tmp_ones
+
+    #从句:有CP ancestor S
+    #独立从句:有CP CP下有IP I
+    #主句:直接有根节点的IP  M
+    #其他:无CP，有非根节点的IP X
+    candi_clause = 0
+    if candi_ancestor_CP == 1:
+        candi_clause = 1
+        father = candi_node.parent
+        while father:
+            if father.tag.startswith("IP"):
+                candi_clause = 2
+                break
+            if father == CP_node:
+                break
+            father = father.parent 
+    else:
+        candi_clause = 3
+        father = candi_node.parent
+        while father:
+            if father.tag.startswith("IP"):
+                if father.parent: #非根节点
+                    candi_clause = 4
+                    break
+            father = father.parent
+    tmp_ones = [0]*5
+    tmp_ones[candi_clause] = 1
+    ifl += tmp_ones
+
+
+    sibling_np_vp = 0
+    if not sentence_dis == 0:
+        sibling_np_vp = 0
+    else:
+        if abs(zp_index - candi_index_end) == 1:
+            sibling_np_vp = 1
+        else:
+            if abs(zp_index - candi_index_begin) == 1:
+                sibling_np_vp = 1
+            else:
+                if abs(zp_index - candi_index_begin) == 2:
+                    if zp_index < candi_index_begin:
+                        if wl_zp[zp_index+1].tag == "PU":
+                            sibling_np_vp = 1
+                elif abs(zp_index-candi_index_end) == 2:
+                    if candi_index_end < zp_index:
+                        if wl_zp[zp_index-1].tag == "PU":
+                            sibling_np_vp = 1
+    tmp_ones = [0]*2
+    tmp_ones[sibling_np_vp] = 1
+    ifl += tmp_ones
+
+    ### ifl 84 维度 ###
+    return ifl 
 
 
 def get_res_feature_NN(zp,candidate,wl_zp,wl_candi,HcPz,PcPz,HcP):
