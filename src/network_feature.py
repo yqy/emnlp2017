@@ -114,7 +114,7 @@ class NetWork():
         w_attention_feature,b_u = init_weight(n_hidden,1,pre="attention_feature",ones=False) 
         self.params += [w_attention_feature]
 
-        self.calcu_attention = tanh(T.dot(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
+        self.calcu_attention = tanh(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
         #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
         #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
 
