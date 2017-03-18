@@ -122,7 +122,7 @@ class NetWork():
 
         self.out = self.attention
 
-        self.get_out = theano.function(inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc,feature],outputs=[self.out],on_unused_input='warn')
+        self.get_out = theano.function(inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc,self.feature],outputs=[self.out],on_unused_input='warn')
         
         l1_norm_squared = sum([(w**2).sum() for w in self.params])
         l2_norm_squared = sum([(abs(w)).sum() for w in self.params])
@@ -141,7 +141,7 @@ class NetWork():
 
         
         self.train_step = theano.function(
-            inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc,feature,t,lr],
+            inputs=[self.zp_x_pre,self.zp_x_post,self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc,self.feature,t,lr],
             outputs=[cost],
             on_unused_input='warn',
             updates=updates)
