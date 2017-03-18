@@ -1072,7 +1072,8 @@ def generate_training_instances_feature(path,w2v):
 
                     if len(np_x_pre) == 0:
                         continue
-                    ifl = get_feature.get_res_feature_NN(zp,candidate,zp_wl,candi_wl,[],[],HcP)
+                    #ifl = get_feature.get_res_feature_NN(zp,candidate,zp_wl,candi_wl,[],[],HcP)
+                    ifl = get_feature.get_res_feature_NN_new(zp,candidate,zp_wl,candi_wl)
                     
                     np_x_pre_list.append(np_x_pre)
                     np_x_prec_list.append(np_x_prec)
@@ -1176,7 +1177,8 @@ def generate_test_instances_feature(path,w2v):
 
                     if len(np_x_pre) == 0:
                         continue
-                    ifl = get_feature.get_res_feature_NN(zp,candidate,zp_wl,candi_wl,[],[],HcP)
+                    #ifl = get_feature.get_res_feature_NN(zp,candidate,zp_wl,candi_wl,[],[],HcP)
+                    ifl = get_feature.get_res_feature_NN_new(zp,candidate,zp_wl,candi_wl)
                     
                     np_x_pre_list.append(np_x_pre)
                     np_x_prec_list.append(np_x_prec)
