@@ -1014,7 +1014,7 @@ def build_zero_one(index,num):
     return tmp_ones
     
 
-def get_res_feature_NN_new(zp,candidate,wl_zp,nl,wl_candi):
+def get_res_feature_NN_new(zp,candidate,wl_zp,wl_candi):
 
     ifl = []
 
