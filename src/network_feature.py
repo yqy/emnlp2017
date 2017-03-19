@@ -47,7 +47,8 @@ class NetWork():
         ##n_hidden: lstm for candi and zp 的隐层维度
 
         #repre_active = ReLU
-        repre_active = linear
+        #repre_active = linear
+        repre_active = tanh
 
         self.params = []
 
@@ -99,8 +100,8 @@ class NetWork():
         #self.get_np_out = theano.function(inputs=[self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc],outputs=[self.np_out_output])
 
         self.feature = T.matrix("feature")
-        self.feature_layer = Layer(feature_dimention,n_hidden,self.feature,repre_active) 
-        self.params += self.feature_layer.params
+        #self.feature_layer = Layer(feature_dimention,n_hidden,self.feature,repre_active) 
+        #self.params += self.feature_layer.params
 
         w_attention_zp,b_attention = init_weight(n_hidden*2,1,pre="attention_zp",ones=False) 
         self.params += [w_attention_zp,b_attention]
@@ -111,10 +112,12 @@ class NetWork():
         #w_attention_np_rnn,b_u = init_weight(n_hidden*4,1,pre="attention_np_rnn",ones=False) 
         #self.params += [w_attention_np_rnn]
 
-        w_attention_feature,b_u = init_weight(n_hidden,1,pre="attention_feature",ones=False) 
+        #w_attention_feature,b_u = init_weight(n_hidden,1,pre="attention_feature",ones=False) 
+        w_attention_feature,b_u = init_weight(feature_dimention,1,pre="attention_feature",ones=False) 
         self.params += [w_attention_feature]
 
-        self.calcu_attention = tanh(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
+        #self.calcu_attention = tanh(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
+        self.calcu_attention = tanh(T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature,w_attention_feature) + b_attention)
         #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + T.dot(self.feature_layer.output,w_attention_feature) + b_attention)
         #self.calcu_attention = tanh(T.dot(self.np_out_output,w_attention_np_rnn) + T.dot(self.zp_out_output,w_attention_zp) + T.dot(self.np_out,w_attention_np) + b_attention)
 
