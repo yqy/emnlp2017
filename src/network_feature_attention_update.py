@@ -120,14 +120,14 @@ class NetWork():
 
         self.np_out = T.concatenate((self.np_nn_post_output,self.np_nn_pre_output),axis=1)
 
-        #np_nn_f = LSTM(n_hidden*2,n_hidden*2,self.np_out)
-        #self.params += np_nn_f.params
-        #np_nn_b = LSTM(n_hidden*2,n_hidden*2,self.np_out[::-1])
-        #self.params += np_nn_b.params
+        np_nn_f = LSTM(n_hidden*2,n_hidden*2,self.np_out)
+        self.params += np_nn_f.params
+        np_nn_b = LSTM(n_hidden*2,n_hidden*2,self.np_out[::-1])
+        self.params += np_nn_b.params
 
-        #self.bi_np_out = T.concatenate((np_nn_f.all_hidden,np_nn_b.all_hidden[::-1]),axis=1)
+        self.bi_np_out = T.concatenate((np_nn_f.all_hidden,np_nn_b.all_hidden[::-1]),axis=1)
 
-        #self.np_out_output = self.bi_np_out
+        self.np_out_output = self.bi_np_out
         #self.get_np_out = theano.function(inputs=[self.np_x_pre,self.np_x_prec,self.np_x_post,self.np_x_postc,self.mask_pre,self.mask_prec,self.mask_post,self.mask_postc],outputs=[self.np_out_output])
 
         self.feature = T.matrix("feature")
